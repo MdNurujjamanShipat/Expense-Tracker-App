@@ -38,19 +38,33 @@ class TransactionListItem extends StatelessWidget {
         title: Text(
           transaction.title,
           style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-          maxLines: 1,
+          maxLines: 8,
           overflow: TextOverflow.ellipsis,
+          softWrap: true,
         ),
-        subtitle: Text(
-          DateFormat('MMM dd, yyyy').format(transaction.date),
-          style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              DateFormat('MMM dd, yyyy').format(transaction.date),
+              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              DateFormat('h:mm a').format(transaction.date),
+              style: TextStyle(fontSize: 11, color: Colors.grey[500]),
+            ),
+          ],
         ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   '$amountPrefix${formatter.format(transaction.amount)}',
@@ -91,7 +105,8 @@ class TransactionListItem extends StatelessWidget {
             ),
           ],
         ),
-        isThreeLine: false,
+        isThreeLine: true,
+        minVerticalPadding: 0,
       ),
     );
   }

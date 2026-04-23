@@ -20,6 +20,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   final _amountController = TextEditingController();
 
   DateTime _selectedDate = DateTime.now();
+  TimeOfDay _selectedTime = TimeOfDay.now();
   TransactionType _selectedType = TransactionType.expense;
 
   @override
@@ -54,13 +55,44 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     }
   }
 
+  Future<void> _selectTime(BuildContext context) async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: _selectedTime,
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: const Color(0xFF1E3A8A),
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null && picked != _selectedTime) {
+      setState(() {
+        _selectedTime = picked;
+      });
+    }
+  }
+
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
+      final combinedDateTime = DateTime(
+        _selectedDate.year,
+        _selectedDate.month,
+        _selectedDate.day,
+        _selectedTime.hour,
+        _selectedTime.minute,
+      );
+
       final transaction = Transaction(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         amount: double.parse(_amountController.text),
         title: _titleController.text.trim(),
-        date: _selectedDate,
+        date: combinedDateTime,
         type: _selectedType,
       );
       Navigator.pop(context, transaction);
@@ -144,6 +176,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                     onTap: () => _selectDate(context),
                   ),
                   const SizedBox(height: 20),
+                  _buildTimePickerCard(accentColor),
+                  const SizedBox(height: 20),
                   CategorySuggestions(
                     selectedType: _selectedType,
                     accentColor: accentColor,
@@ -156,6 +190,65 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
             SaveButton(isIncome: isIncome, onPressed: _submitForm),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildTimePickerCard(Color accentColor) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Time',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey.shade700,
+            ),
+          ),
+          const SizedBox(height: 12),
+          InkWell(
+            onTap: () => _selectTime(context),
+            borderRadius: BorderRadius.circular(12),
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Row(
+                children: [
+                  Icon(Icons.access_time_rounded, color: accentColor, size: 22),
+                  const SizedBox(width: 12),
+                  Text(
+                    _selectedTime.format(context),
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const Spacer(),
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    color: Colors.grey.shade400,
+                    size: 20,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Container(height: 1, color: Colors.grey.shade100),
+        ],
       ),
     );
   }

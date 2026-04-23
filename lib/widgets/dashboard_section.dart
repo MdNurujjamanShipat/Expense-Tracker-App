@@ -39,83 +39,83 @@ class DashboardSection extends StatelessWidget {
         ],
       ),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 20, 20, 35),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 25),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(15),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Icon(
                     Icons.waving_hand_rounded,
                     color: Colors.white,
-                    size: 24,
+                    size: 20,
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 10),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       greeting,
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: 12,
                         color: Colors.white.withOpacity(0.9),
                         fontWeight: FontWeight.w500,
                         letterSpacing: 0.5,
                       ),
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 4),
                     Text(
                       'Ready to track your finances?',
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.white.withOpacity(0.7),
+                        color: Colors.white.withOpacity(0.8),
                       ),
                     ),
                   ],
                 ),
               ],
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text(
                   'Your Financial Overview',
                   style: TextStyle(
-                    fontSize: 18,
+                    fontSize: 16,
                     color: Colors.white,
                     fontWeight: FontWeight.w600,
-                    letterSpacing: -0.3,
+                    letterSpacing: 0.1,
                   ),
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
+                    horizontal: 8,
+                    vertical: 4,
                   ),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(15),
                   ),
                   child: Row(
                     children: [
                       Icon(
                         Icons.calendar_today_rounded,
-                        size: 14,
+                        size: 10,
                         color: Colors.white.withOpacity(0.8),
                       ),
-                      const SizedBox(width: 6),
+                      const SizedBox(width: 4),
                       Text(
                         DateFormat('MMM yyyy').format(DateTime.now()),
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: 9,
                           color: Colors.white.withOpacity(0.8),
                           fontWeight: FontWeight.w500,
                         ),
@@ -125,42 +125,50 @@ class DashboardSection extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 25),
-            Row(
-              children: [
-                Expanded(
-                  child: DashboardCard(
-                    title: 'Total Balance',
-                    amount: totalBalance,
-                    color: Colors.white,
-                    icon: Icons.account_balance_wallet_rounded,
-                    backgroundColor: Colors.white.withOpacity(0.15),
-                    textColor: Colors.white,
+            const SizedBox(height: 18),
+            SizedBox(
+              height: 110,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                children: [
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.35,
+                    child: DashboardCard(
+                      title: 'Total Balance',
+                      amount: totalBalance,
+                      color: Colors.white,
+                      icon: Icons.account_balance_wallet_rounded,
+                      backgroundColor: Colors.white.withOpacity(0.15),
+                      textColor: Colors.white,
+                    ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: DashboardCard(
-                    title: 'Total Income',
-                    amount: totalIncome,
-                    color: Colors.green.shade300,
-                    icon: Icons.trending_down_rounded,
-                    backgroundColor: Colors.white.withOpacity(0.15),
-                    textColor: Colors.white,
+                  const SizedBox(width: 8),
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.35,
+                    child: DashboardCard(
+                      title: 'Total Income',
+                      amount: totalIncome,
+                      color: Colors.green.shade300,
+                      icon: Icons.trending_down_rounded,
+                      backgroundColor: Colors.white.withOpacity(0.15),
+                      textColor: Colors.white,
+                    ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: DashboardCard(
-                    title: 'Total Expense',
-                    amount: totalExpense,
-                    color: Colors.red.shade300,
-                    icon: Icons.trending_up_rounded,
-                    backgroundColor: Colors.white.withOpacity(0.15),
-                    textColor: Colors.white,
+                  const SizedBox(width: 8),
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.35,
+                    child: DashboardCard(
+                      title: 'Total Expense',
+                      amount: totalExpense,
+                      color: Colors.red.shade300,
+                      icon: Icons.trending_up_rounded,
+                      backgroundColor: Colors.white.withOpacity(0.15),
+                      textColor: Colors.white,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ],
         ),

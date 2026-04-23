@@ -3,70 +3,48 @@ import 'package:provider/provider.dart';
 import '../viewmodels/transaction_viewmodel.dart';
 import '../widgets/dashboard_section.dart';
 import '../widgets/transaction_list_header.dart';
-import '../widgets/transaction_list_item.dart';
-import '../widgets/empty_transaction_state.dart';
-import '../constants/app_constants.dart';
-import 'add_transaction_screen.dart';
+import '../widgets/filter_buttons.dart';
+import '../widgets/filtered_transaction_list.dart';
+import '../widgets/home_app_bar.dart';
+import '../widgets/home_floating_action_button.dart';
 import '../models/transaction.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  int _selectedFilter = 0;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
-      appBar: AppBar(
-        title: const Text(
-          'Expense Tracker',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 24,
-            letterSpacing: -0.5,
-          ),
-        ),
-        elevation: 0,
-        centerTitle: false,
-        backgroundColor: Colors.transparent,
-        foregroundColor: Colors.white,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: AppConstants.primaryGradient,
-            ),
-          ),
-        ),
-        actions: [
-          Container(
-            margin: const EdgeInsets.only(right: 16),
-            child: CircleAvatar(
-              backgroundColor: Colors.white.withOpacity(0.2),
-              child: IconButton(
-                icon: const Icon(Icons.refresh_rounded, color: Colors.white),
-                onPressed: () {
-                  context.read<TransactionViewModel>().loadTransactions();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: const Text('Refreshed successfully'),
-                      duration: const Duration(seconds: 2),
-                      backgroundColor: Colors.green,
-                      behavior: SnackBarBehavior.floating,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                  );
-                },
-                tooltip: 'Refresh',
-              ),
-            ),
-          ),
-        ],
-      ),
+      appBar: const HomeAppBar(),
       body: Consumer<TransactionViewModel>(
         builder: (context, viewModel, child) {
+          List<Transaction> filteredTransactions = viewModel.transactions;
+          if (_selectedFilter == 1) {
+            filteredTransactions = viewModel.transactions
+                .where((t) => t.type == TransactionType.income)
+                .toList();
+          } else if (_selectedFilter == 2) {
+            filteredTransactions = viewModel.transactions
+                .where((t) => t.type == TransactionType.expense)
+                .toList();
+          }
+
+          int allCount = viewModel.getTransactionCount();
+          int incomeCount = viewModel.transactions
+              .where((t) => t.type == TransactionType.income)
+              .length;
+          int expenseCount = viewModel.transactions
+              .where((t) => t.type == TransactionType.expense)
+              .length;
+
           return Column(
             children: [
               DashboardSection(
@@ -80,116 +58,70 @@ class HomeScreen extends StatelessWidget {
                 transactionCount: viewModel.getTransactionCount(),
               ),
               const SizedBox(height: 8),
+
+              FilterButtons(
+                selectedFilter: _selectedFilter,
+                allCount: allCount,
+                incomeCount: incomeCount,
+                expenseCount: expenseCount,
+                onFilterChanged: (index) {
+                  setState(() {
+                    _selectedFilter = index;
+                  });
+                },
+              ),
+
+              const SizedBox(height: 8),
+
               Expanded(
-                child: viewModel.hasTransactions
-                    ? ListView.builder(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
+                child: FilteredTransactionList(
+                  transactions: filteredTransactions,
+                  selectedFilter: _selectedFilter,
+                  onDelete: (transaction) {
+                    viewModel.deleteTransaction(transaction.id);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Row(
+                          children: const [
+                            Icon(
+                              Icons.delete_outline,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                            SizedBox(width: 12),
+                            Text('Transaction deleted'),
+                          ],
                         ),
-                        itemCount: viewModel.transactions.length,
-                        itemBuilder: (context, index) {
-                          final transaction = viewModel.transactions[index];
-                          return TransactionListItem(
-                            transaction: transaction,
-                            onDelete: () {
-                              viewModel.deleteTransaction(transaction.id);
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Row(
-                                    children: const [
-                                      Icon(
-                                        Icons.delete_outline,
-                                        color: Colors.white,
-                                        size: 20,
-                                      ),
-                                      SizedBox(width: 12),
-                                      Text('Transaction deleted'),
-                                    ],
-                                  ),
-                                  duration: const Duration(seconds: 2),
-                                  backgroundColor: Colors.red,
-                                  behavior: SnackBarBehavior.floating,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                ),
-                              );
-                            },
-                          );
-                        },
-                      )
-                    : const EmptyTransactionState(),
+                        duration: const Duration(seconds: 2),
+                        backgroundColor: Colors.red,
+                        behavior: SnackBarBehavior.floating,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    );
+                  },
+                ),
               ),
             ],
           );
         },
       ),
-      floatingActionButton: Container(
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(colors: AppConstants.primaryGradient),
-          borderRadius: BorderRadius.circular(30),
-          boxShadow: [
-            BoxShadow(
-              color: AppConstants.deepBlue.withOpacity(0.4),
-              blurRadius: 15,
-              offset: const Offset(0, 5),
-            ),
-          ],
-        ),
-        child: FloatingActionButton.extended(
-          onPressed: () async {
-            final result = await Navigator.push<Transaction>(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const AddTransactionScreen(),
-              ),
-            );
-
-            if (result != null) {
-              context.read<TransactionViewModel>().addTransaction(result);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Row(
-                    children: const [
-                      Icon(Icons.check_circle, color: Colors.white, size: 20),
-                      SizedBox(width: 12),
-                      Text('Transaction added successfully'),
-                    ],
-                  ),
-                  duration: const Duration(seconds: 2),
-                  backgroundColor: Colors.green,
-                  behavior: SnackBarBehavior.floating,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              );
-            }
-          },
-          icon: const Icon(Icons.add_rounded, color: Colors.white),
-          label: const Text(
-            'Add Transaction',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
-          ),
-          elevation: 0,
-          backgroundColor: Colors.transparent,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30),
-          ),
-        ),
-      ),
+      floatingActionButton: const HomeFloatingActionButton(),
     );
   }
 
   String _getGreeting() {
-    final hour = DateTime.now().hour;
-    if (hour < 12) {
+    final hour = DateTime.now().toLocal().hour;
+
+    if (hour >= 5 && hour < 12) {
       return 'Good Morning';
-    } else if (hour < 17) {
+    } else if (hour >= 12 && hour < 16) {
       return 'Good Afternoon';
-    } else {
+    } else if (hour >= 16 && hour < 19) {
       return 'Good Evening';
+    } else {
+      return 'Good Night';
     }
   }
 }
