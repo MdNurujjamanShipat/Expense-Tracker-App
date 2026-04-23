@@ -29,7 +29,7 @@ class DescriptionInputField extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Description',
+            'Title ',
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
